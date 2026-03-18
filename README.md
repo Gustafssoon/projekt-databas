@@ -13,4 +13,14 @@ Har vi tid över har vi tänkt att bygga en webbsida, för att kunna använda mo
 
 ---
 
+## ER-diagram
+
+Databasens struktur illustreras i följande ER-diagram:
+
+![ER-diagram](Databas-projekt.drawio.png)
+
+Relationer i modellen:
+
+---
+
 ### 🚧 WORK IN PROGRESS 🚧
