@@ -152,4 +152,6 @@ Databasens struktur illustreras här:
 
 ### 🚧 Status
 
-**Work in progress**
+**WORK IN PROGRESS**
+
+*Ändringar kommer ske med tiden*
