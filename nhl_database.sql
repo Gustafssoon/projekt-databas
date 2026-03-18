@@ -285,3 +285,5 @@ FROM player_team_season pts
 JOIN player p ON pts.player_id = p.player_id
 JOIN team t ON pts.team_id = t.team_id
 JOIN season s ON pts.season_id = s.season_id;
+
+CALL get_points_leaderboard_by_season(20232024); -- Testa stored procedure
