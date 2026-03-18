@@ -1,18 +1,16 @@
-### Idéer på databas
-- Hockeydatabas - exempel https://fantrax.com/
-- League of Legends - exempel https://wiki.leagueoflegends.com/en-us/
-- Esport-databas - exempel https://lol.fandom.com/wiki/League_of_Legends_Esports_Wiki
+# 📃 NHL-databas
 
-##### Hockeydatabas
-- Samla in data från live matcher
-- Se all sorts statistik hur många tacklingar, skott, blockeringar osv en spelare har gjort.
-- Ska kunna sortera på t.ex. tacklingar. Då vill man se en lista på vilka som tacklats mest i ligan.
-- Kunna gå tillbaka i tiden och läsa av data från tidigare år.
+*Slutprojekt i Databaser (YH25)*
 
-#### League-databas
-- Lägga in alla champions
-- Kunna se all deras statistik från spelet, health, mana, attack damage, ability power osv
-- Filtrera in champions i rätt region
+**Gabriel Gustafsson & Carlos Johansson Bergqvist**
 
-#### Esport-databas
-- Möjlighet att kunna söka på en specifik spelare eller lag.
+---
+
+## Syfte
+Syftet med databasen är att modellera en NHL-databas som samlar in data från live matcher. Vi vill samla in olika sorters statistik som hur många tacklingar, skott, blockeringar osv en spelare har gjort. Man ska sedan kunna sortera efter vilka spelare som har gjort flest tacklingar i ligan. Statistiken ska finnas från förgående år också.
+
+Har vi tid över har vi tänkt att bygga en webbsida, för att kunna använda mot databasen.
+
+---
+
+### 🚧 WORK IN PROGRESS 🚧
