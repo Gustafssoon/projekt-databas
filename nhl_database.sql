@@ -98,23 +98,41 @@ CREATE TABLE team_game_stats (
     UNIQUE KEY uq_team_game (team_id, game_id)
 );
 
+-- ============
+--  TRIGGERS
+-- ============
+
+DELIMITER $$
+
+CREATE TRIGGER trg_pre_insert_player_stats
+BEFORE INSERT ON player_game_stats
+FOR EACH ROW
+BEGIN
+    SET NEW.points = NEW.goals + NEW.assists;
+END$$
+
+CREATE TRIGGER trg_pre_update_player_stats
+BEFORE UPDATE ON player_game_stats
+FOR EACH ROW
+BEGIN
+    SET NEW.points = NEW.goals + NEW.assists;
+END$$
+
+DELIMITER ;
 
 -- ============
--- 	TESTDATA
+--  TESTDATA
 -- ============
 
--- TEAM
 INSERT INTO team (team_id, name, city, abbreviation)
 VALUES
 (1, 'Maple Leafs', 'Toronto', 'TOR'),
 (2, 'Canadiens', 'Montreal', 'MTL');
 
--- SEASON
 INSERT INTO season (season_id, label, start_date, end_date, is_current)
 VALUES
 (20232024, '2023/2024', '2023-10-01', '2024-06-30', TRUE);
 
--- PLAYER
 INSERT INTO player (player_id, first_name, last_name, birth_date, nationality, shoot_catches, primary_position, active)
 VALUES
 (101, 'Auston', 'Matthews', '1997-09-17', 'Canada', 'L', 'C', TRUE),
@@ -122,7 +140,6 @@ VALUES
 (103, 'Nick', 'Suzuki', '1999-08-10', 'Canada', 'R', 'C', TRUE),
 (104, 'Cole', 'Caufield', '2001-01-02', 'USA', 'R', 'RW', TRUE);
 
--- PLAYER_TEAM_SEASON
 INSERT INTO player_team_season (
     player_team_season_id,
     player_id,
@@ -139,7 +156,6 @@ VALUES
 (3, 103, 2, 20232024, '14', 'C', '2023-10-01', NULL),
 (4, 104, 2, 20232024, '22', 'RW', '2023-10-01', NULL);
 
--- GAME
 INSERT INTO game (
     game_id,
     home_team_id,
@@ -156,7 +172,6 @@ INSERT INTO game (
 VALUES
 (1001, 1, 2, 20232024, '2023-11-10', 'Regular Season', 'Final', 4, 2, FALSE, FALSE);
 
--- PLAYER_GAME_STATS
 INSERT INTO player_game_stats (
     player_game_stats_id,
     game_id,
@@ -172,12 +187,11 @@ INSERT INTO player_game_stats (
     plus_minus
 )
 VALUES
-(1, 1001, 101, 1, 2, 1, 3, 6, 2, 0, 1260, 2),
-(2, 1001, 102, 1, 1, 2, 3, 4, 1, 2, 1185, 1),
-(3, 1001, 103, 2, 1, 0, 1, 5, 3, 0, 1210, -1),
-(4, 1001, 104, 2, 1, 1, 2, 4, 2, 0, 1150, -1);
+(1, 1001, 101, 1, 2, 1, 999, 6, 2, 0, 1260, 2),
+(2, 1001, 102, 1, 1, 2, 999, 4, 1, 2, 1185, 1),
+(3, 1001, 103, 2, 1, 0, 999, 5, 3, 0, 1210, -1),
+(4, 1001, 104, 2, 1, 1, 999, 4, 2, 0, 1150, -1);
 
--- TEAM_GAME_STATS
 INSERT INTO team_game_stats (
     team_game_stats_id,
     team_id,
@@ -193,20 +207,15 @@ VALUES
 (1, 1, 1001, 32, 18, 4, 52.30, 1, 3),
 (2, 2, 1001, 29, 21, 2, 47.70, 0, 2);
 
--- ========
--- SELECTS
--- ========
+-- =========
+--  SELECTS
+-- =========
 
--- Visa alla spelare
 SELECT * FROM player;
--- Visa alla matcher
 SELECT * FROM game;
--- Visa spelarstatistik för matchen
 SELECT * FROM player_game_stats;
--- Visa lagstatistik för matchen
 SELECT * FROM team_game_stats;
 
--- flest poäng i säsongen
 SELECT
     p.player_id,
     p.first_name,
@@ -219,7 +228,6 @@ WHERE g.season_id = 20232024
 GROUP BY p.player_id, p.first_name, p.last_name
 ORDER BY total_points DESC;
 
--- flest tacklingar i säsongen
 SELECT
     p.player_id,
     p.first_name,
@@ -232,7 +240,6 @@ WHERE g.season_id = 20232024
 GROUP BY p.player_id, p.first_name, p.last_name
 ORDER BY total_hits DESC;
 
--- matchinfo med lag
 SELECT
     g.game_id,
     ht.name AS home_team,
@@ -245,7 +252,6 @@ FROM game g
 JOIN team ht ON g.home_team_id = ht.team_id
 JOIN team at ON g.away_team_id = at.team_id;
 
--- vilken klubb spelaren tillhör i säsongen
 SELECT
     p.first_name,
     p.last_name,
