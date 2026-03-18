@@ -8,7 +8,7 @@ CREATE TABLE player (
     last_name VARCHAR(50) NOT NULL,
     birth_date DATE NOT NULL,
     nationality VARCHAR(50) NOT NULL,
-    shoot_catches VARCHAR(20) NOT NULL, -- höger/vänsterfattad
+    shoot_catches VARCHAR(20) NOT NULL, -- anger om spelaren är höger eller vänsterfattad
     primary_position VARCHAR(20) NOT NULL,
     active BOOLEAN NOT NULL -- Om spelaren är aktiv
 );
@@ -78,7 +78,7 @@ CREATE TABLE player_game_stats (
     FOREIGN KEY (game_id) REFERENCES game(game_id),
     FOREIGN KEY (player_id) REFERENCES player(player_id),
     FOREIGN KEY (team_id) REFERENCES team(team_id),
-    UNIQUE KEY uq_player_game (game_id, player_id), -- en spelares statistik i en specifik match
+    UNIQUE KEY uq_player_game (game_id, player_id), -- Förhindrar att samma spelare registreras flera gånger i samma match
 	INDEX idx_pgs_player_id (player_id),
 	INDEX idx_pgs_game_id (game_id)
 );
@@ -155,7 +155,7 @@ INSERT INTO season (season_id, label, start_date, end_date, is_current)
 VALUES
 (20232024, '2023/2024', '2023-10-01', '2024-06-30', TRUE);
 
--- Lägger in fyra spelare som läggs in i testdatan
+-- Lägger in fyra spelare som används i testdatan
 INSERT INTO player (player_id, first_name, last_name, birth_date, nationality, shoot_catches, primary_position, active)
 VALUES
 (101, 'Auston', 'Matthews', '1997-09-17', 'Canada', 'L', 'C', TRUE),
@@ -176,7 +176,7 @@ INSERT INTO game (game_id, home_team_id, away_team_id, season_id, game_date, gam
 VALUES
 (1001, 1, 2, 20232024, '2023-11-10', 'Regular Season', 'Final', 4, 2, FALSE, FALSE);
 
--- Points sätts automatiskt av trigger (999 ignoreras)
+-- Points sätts automatiskt av triggern; värdet 999 används bara för att testa att triggern fungerar
 INSERT INTO player_game_stats (player_game_stats_id, game_id, player_id, team_id, goals, assists, points, shots, hits, pim, toi_seconds, plus_minus)
 VALUES
 (1, 1001, 101, 1, 2, 1, 999, 6, 2, 0, 1260, 2),
@@ -204,7 +204,7 @@ SELECT * FROM player_game_stats;
 -- Visa lagstatistik för matchen
 SELECT * FROM team_game_stats;
 
--- flest poäng i säsongen
+-- Visar vilka spelare som har flest poäng under den valda säsongen
 SELECT p.player_id, p.first_name, p.last_name, SUM(pgs.points) AS total_points
 FROM player_game_stats pgs
 JOIN player p ON p.player_id = pgs.player_id
@@ -213,7 +213,7 @@ WHERE g.season_id = 20232024
 GROUP BY p.player_id, p.first_name, p.last_name
 ORDER BY total_points DESC;
 
--- flest tacklingar i säsongen
+-- Visar vilka spelare som har flest tacklingar under den valda säsongen
 SELECT p.player_id, p.first_name, p.last_name, SUM(pgs.hits) AS total_hits
 FROM player_game_stats pgs
 JOIN player p ON p.player_id = pgs.player_id
@@ -222,13 +222,13 @@ WHERE g.season_id = 20232024
 GROUP BY p.player_id, p.first_name, p.last_name
 ORDER BY total_hits DESC;
 
--- matchinfo med lag
+-- Visar matchinformation tillsammans med hemma- och bortalag
 SELECT g.game_id, ht.name AS home_team, at.name AS away_team, g.game_date, g.home_score, g.away_score, g.status
 FROM game g
 JOIN team ht ON g.home_team_id = ht.team_id
 JOIN team at ON g.away_team_id = at.team_id;
 
--- vilken klubb spelaren tillhör i säsongen
+-- Visar vilket lag varje spelare tillhör under den aktuella säsongen
 SELECT p.first_name, p.last_name, t.name AS team_name, s.label AS season_label, pts.jersey_number
 FROM player_team_season pts
 JOIN player p ON pts.player_id = p.player_id
