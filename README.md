@@ -23,4 +23,14 @@ Relationer i modellen:
 
 ---
 
+## Lärdomar
+
+---
+
+## 📁 Filer i projektet
+* README.md
+* [**Databas-projekt.drawio.png**](Databas-projekt.drawio.png).
+
+---
+
 ### 🚧 WORK IN PROGRESS 🚧
