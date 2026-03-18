@@ -40,8 +40,8 @@ CREATE TABLE player_team_season (
     FOREIGN KEY (player_id) REFERENCES player(player_id),
     FOREIGN KEY (team_id) REFERENCES team(team_id),
     FOREIGN KEY (season_id) REFERENCES season(season_id),
-    UNIQUE KEY uq_player_team_season (player_id, team_id, season_id),
-    INDEX idx_pts_player_season (player_id, season_id)
+    UNIQUE KEY uq_player_team_season (player_id, team_id, season_id),     -- Förhindrar dubletter
+    INDEX idx_pts_player_season (player_id, season_id) -- Index för snabb sökning per spelare och säsong
 );
 
 CREATE TABLE game (
@@ -59,7 +59,7 @@ CREATE TABLE game (
     FOREIGN KEY (home_team_id) REFERENCES team(team_id),
     FOREIGN KEY (away_team_id) REFERENCES team(team_id),
     FOREIGN KEY (season_id) REFERENCES season(season_id),
-    INDEX idx_game_season_date (season_id, game_date)
+    INDEX idx_game_season_date (season_id, game_date)     -- Index för queries som filtrerar på säsong och datum
 );
 
 CREATE TABLE player_game_stats (
@@ -95,7 +95,7 @@ CREATE TABLE team_game_stats (
     powerplay_opportunities INT NOT NULL,
     FOREIGN KEY (team_id) REFERENCES team(team_id),
     FOREIGN KEY (game_id) REFERENCES game(game_id),
-    UNIQUE KEY uq_team_game (team_id, game_id)
+    UNIQUE KEY uq_team_game (team_id, game_id) -- Förhindrar dubletter
 );
 
 -- ============
@@ -104,6 +104,7 @@ CREATE TABLE team_game_stats (
 
 DELIMITER $$
 
+-- Sätter points automatiskt vid INSERT
 CREATE TRIGGER trg_pre_insert_player_stats
 BEFORE INSERT ON player_game_stats
 FOR EACH ROW
@@ -111,6 +112,7 @@ BEGIN
     SET NEW.points = NEW.goals + NEW.assists;
 END$$
 
+-- Sätter points automatiskt vid UPDATE
 CREATE TRIGGER trg_pre_update_player_stats
 BEFORE UPDATE ON player_game_stats
 FOR EACH ROW
@@ -128,12 +130,7 @@ DELIMITER $$
 
 CREATE PROCEDURE get_points_leaderboard_by_season(IN in_season_id INT)
 BEGIN
-    SELECT
-        p.player_id,
-        p.first_name,
-        p.last_name,
-        SUM(pgs.points) AS total_points
-    FROM player_game_stats pgs
+    SELECT p.player_id, p.first_name, p.last_name, SUM(pgs.points) AS total_points FROM player_game_stats pgs
     JOIN player p ON p.player_id = pgs.player_id
     JOIN game g ON g.game_id = pgs.game_id
     WHERE g.season_id = in_season_id
@@ -163,69 +160,25 @@ VALUES
 (103, 'Nick', 'Suzuki', '1999-08-10', 'Canada', 'R', 'C', TRUE),
 (104, 'Cole', 'Caufield', '2001-01-02', 'USA', 'R', 'RW', TRUE);
 
-INSERT INTO player_team_season (
-    player_team_season_id,
-    player_id,
-    team_id,
-    season_id,
-    jersey_number,
-    listed_position,
-    start_date,
-    end_date
-)
+INSERT INTO player_team_season (player_team_season_id, player_id, team_id, season_id, jersey_number, listed_position, start_date, end_date) 
 VALUES
 (1, 101, 1, 20232024, '34', 'C', '2023-10-01', NULL),
 (2, 102, 1, 20232024, '16', 'RW', '2023-10-01', NULL),
 (3, 103, 2, 20232024, '14', 'C', '2023-10-01', NULL),
 (4, 104, 2, 20232024, '22', 'RW', '2023-10-01', NULL);
 
-INSERT INTO game (
-    game_id,
-    home_team_id,
-    away_team_id,
-    season_id,
-    game_date,
-    game_type,
-    status,
-    home_score,
-    away_score,
-    overtime_flag,
-    shootout_flag
-)
+INSERT INTO game (game_id, home_team_id, away_team_id, season_id, game_date, game_type, status, home_score, away_score, overtime_flag, shootout_flag)
 VALUES
 (1001, 1, 2, 20232024, '2023-11-10', 'Regular Season', 'Final', 4, 2, FALSE, FALSE);
 
-INSERT INTO player_game_stats (
-    player_game_stats_id,
-    game_id,
-    player_id,
-    team_id,
-    goals,
-    assists,
-    points,
-    shots,
-    hits,
-    pim,
-    toi_seconds,
-    plus_minus
-)
+INSERT INTO player_game_stats (player_game_stats_id, game_id, player_id, team_id, goals, assists, points, shots, hits, pim, toi_seconds, plus_minus)
 VALUES
 (1, 1001, 101, 1, 2, 1, 999, 6, 2, 0, 1260, 2),
 (2, 1001, 102, 1, 1, 2, 999, 4, 1, 2, 1185, 1),
 (3, 1001, 103, 2, 1, 0, 999, 5, 3, 0, 1210, -1),
 (4, 1001, 104, 2, 1, 1, 999, 4, 2, 0, 1150, -1);
 
-INSERT INTO team_game_stats (
-    team_game_stats_id,
-    team_id,
-    game_id,
-    shots,
-    hits,
-    pim,
-    faceoff_win_pct,
-    powerplay_goals,
-    powerplay_opportunities
-)
+INSERT INTO team_game_stats (team_game_stats_id, team_id, game_id, shots, hits, pim, faceoff_win_pct, powerplay_goals, powerplay_opportunities)
 VALUES
 (1, 1, 1001, 32, 18, 4, 52.30, 1, 3),
 (2, 2, 1001, 29, 21, 2, 47.70, 0, 2);
@@ -234,16 +187,17 @@ VALUES
 --  SELECTS
 -- =========
 
+-- Visa alla spelare
 SELECT * FROM player;
+-- Visa alla matcher
 SELECT * FROM game;
+-- Visa spelarstatistik för matchen
 SELECT * FROM player_game_stats;
+-- Visa lagstatistik för matchen
 SELECT * FROM team_game_stats;
 
-SELECT
-    p.player_id,
-    p.first_name,
-    p.last_name,
-    SUM(pgs.points) AS total_points
+-- flest poäng i säsongen
+SELECT p.player_id, p.first_name, p.last_name, SUM(pgs.points) AS total_points
 FROM player_game_stats pgs
 JOIN player p ON p.player_id = pgs.player_id
 JOIN game g ON g.game_id = pgs.game_id
@@ -251,11 +205,8 @@ WHERE g.season_id = 20232024
 GROUP BY p.player_id, p.first_name, p.last_name
 ORDER BY total_points DESC;
 
-SELECT
-    p.player_id,
-    p.first_name,
-    p.last_name,
-    SUM(pgs.hits) AS total_hits
+-- flest tacklingar i säsongen
+SELECT p.player_id, p.first_name, p.last_name, SUM(pgs.hits) AS total_hits
 FROM player_game_stats pgs
 JOIN player p ON p.player_id = pgs.player_id
 JOIN game g ON g.game_id = pgs.game_id
@@ -263,27 +214,18 @@ WHERE g.season_id = 20232024
 GROUP BY p.player_id, p.first_name, p.last_name
 ORDER BY total_hits DESC;
 
-SELECT
-    g.game_id,
-    ht.name AS home_team,
-    at.name AS away_team,
-    g.game_date,
-    g.home_score,
-    g.away_score,
-    g.status
+-- matchinfo med lag
+SELECT g.game_id, ht.name AS home_team, at.name AS away_team, g.game_date, g.home_score, g.away_score, g.status
 FROM game g
 JOIN team ht ON g.home_team_id = ht.team_id
 JOIN team at ON g.away_team_id = at.team_id;
 
-SELECT
-    p.first_name,
-    p.last_name,
-    t.name AS team_name,
-    s.label AS season_label,
-    pts.jersey_number
+-- vilken klubb spelaren tillhör i säsongen
+SELECT p.first_name, p.last_name, t.name AS team_name, s.label AS season_label, pts.jersey_number
 FROM player_team_season pts
 JOIN player p ON pts.player_id = p.player_id
 JOIN team t ON pts.team_id = t.team_id
 JOIN season s ON pts.season_id = s.season_id;
 
-CALL get_points_leaderboard_by_season(20232024); -- Testa stored procedure
+-- Testa stored procedure
+CALL get_points_leaderboard_by_season(20232024);
