@@ -11,12 +11,14 @@ CREATE TABLE player (
     primary_position VARCHAR(20) NOT NULL,
     active BOOLEAN NOT NULL
 );
+
 CREATE TABLE team (
     team_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     city VARCHAR(100) NOT NULL,
     abbreviation VARCHAR(10) NOT NULL
 );
+
 CREATE TABLE season (
     season_id INT AUTO_INCREMENT PRIMARY KEY,
     label VARCHAR(20) NOT NULL,
@@ -24,6 +26,7 @@ CREATE TABLE season (
     end_date DATE NOT NULL,
     is_current BOOLEAN NOT NULL
 );
+
 CREATE TABLE player_team_season (
     player_team_season_id INT AUTO_INCREMENT PRIMARY KEY,
     player_id INT NOT NULL,
@@ -37,6 +40,7 @@ CREATE TABLE player_team_season (
     FOREIGN KEY (team_id) REFERENCES team(team_id),
     FOREIGN KEY (season_id) REFERENCES season(season_id)
 );
+
 CREATE TABLE game (
     game_id INT AUTO_INCREMENT PRIMARY KEY,
     home_team_id INT NOT NULL,
@@ -53,6 +57,7 @@ CREATE TABLE game (
     FOREIGN KEY (away_team_id) REFERENCES team(team_id),
     FOREIGN KEY (season_id) REFERENCES season(season_id)
 );
+
 CREATE TABLE player_game_stats (
     player_game_stats_id INT AUTO_INCREMENT PRIMARY KEY,
     game_id INT NOT NULL,
@@ -70,6 +75,7 @@ CREATE TABLE player_game_stats (
     FOREIGN KEY (player_id) REFERENCES player(player_id),
     FOREIGN KEY (team_id) REFERENCES team(team_id)
 );
+
 CREATE TABLE team_game_stats (
     team_game_stats_id INT AUTO_INCREMENT PRIMARY KEY,
     team_id INT NOT NULL,
