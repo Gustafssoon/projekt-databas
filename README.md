@@ -6,11 +6,11 @@
 
 ---
 
-## Projektbeskrivning
+Projektbeskrivning
 
-Detta projekt syftar till att modellera och implementera en relationsdatabas för NHL-statistik. Databasen är designad för att hantera data från matcher och lagra detaljerad spelar- och lagstatistik.
+I det här projektet har vi byggt en relationsdatabas för NHL-statistik. Tanken är att kunna lagra data från matcher och sedan använda den för att analysera hur spelare presterar.
 
-Fokus ligger på att möjliggöra analys av prestationer över tid, som till exempel:
+Vi har valt att fokusera på statistik som:
 
 * Mål
 * Assist
@@ -21,7 +21,7 @@ Fokus ligger på att möjliggöra analys av prestationer över tid, som till exe
 * Speltid (TOI)
 * +/-  (plus/minus)
 
-Databasen stödjer även historisk data, vilket gör det möjligt att jämföra spelare mellan olika säsonger.
+Databasen är också gjord för att kunna hantera flera säsonger, så att man kan jämföra spelare över tid.
 
 ---
 
@@ -71,7 +71,7 @@ Triggers körs vid:
 CALL get_points_leaderboard_by_season(season_id);
 ```
 
-Returnerar en leaderboard över spelare baserat på total poäng för en given säsong.
+Får tillbaka en leaderboard över spelare baserat på total poäng för en specifik säsong.
 
 ---
 
@@ -89,7 +89,7 @@ GROUP BY p.player_id
 ORDER BY total_points DESC;
 ```
 
-### Tacklingar (hits leaderboard)
+### Tacklingsliga
 
 ```sql
 SELECT p.first_name, p.last_name, SUM(pgs.hits) AS total_hits
@@ -117,7 +117,7 @@ Projektet innehåller testdata för:
 
 ## ER-diagram
 
-Databasens struktur illustreras här:
+Databasens struktur visas här:
 
 ![ER-diagram](Databas-projekt.drawio.png)
 
@@ -125,11 +125,10 @@ Databasens struktur illustreras här:
 
 ## Lärdomar
 
-* Design av relationsdatabaser och normalisering
-* Hantering av many-to-many-relationer
-* Användning av triggers för dataintegritet
+* Spännande projekt att få bygga en lite större databas
+* Fortsätta lära oss mer om triggers och hur man använder dom
 * Stored procedures för återanvändbar logik
-* Indexering för prestanda
+* Indexering för bättre prestanda
 
 ---
 
