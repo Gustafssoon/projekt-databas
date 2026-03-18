@@ -6,7 +6,7 @@
 
 ---
 
-Projektbeskrivning
+## Projektbeskrivning
 
 I det här projektet har vi byggt en relationsdatabas för NHL-statistik. Tanken är att kunna lagra data från matcher och sedan använda den för att analysera hur spelare presterar.
 
@@ -21,7 +21,7 @@ Vi har valt att fokusera på statistik som:
 * Speltid (TOI)
 * +/-  (plus/minus)
 
-Databasen är också gjord för att kunna hantera flera säsonger, så att man kan jämföra spelare över tid.
+Databasen är designad för att hantera flera säsonger, så att man kan jämföra spelare över tid.
 
 ---
 
@@ -46,7 +46,7 @@ Databasen består av följande huvudtabeller:
 * En spelare kan spela i flera lag över olika säsonger
 * En match spelas mellan två lag
 * Statistik lagras per spelare och match
-* Statistik aggregeras per säsong via queries
+* Statistik aggregeras per säsong med hjälp av JOINs och GROUP BY i queries
 
 ---
 
@@ -71,7 +71,7 @@ Triggers körs vid:
 CALL get_points_leaderboard_by_season(season_id);
 ```
 
-Får tillbaka en leaderboard över spelare baserat på total poäng för en specifik säsong.
+Returnerar en leaderboard över spelare baserat på total poäng för en specifik säsong.
 
 ---
 
@@ -111,7 +111,7 @@ Projektet innehåller testdata för:
 * 1 säsong
 * 4 spelare
 * 1 match
-* Statistik för både spelare och lag
+* Spelar- och lagstatistik kopplad till matchen
 
 ---
 
@@ -119,16 +119,16 @@ Projektet innehåller testdata för:
 
 Databasens struktur visas här:
 
-![ER-diagram](Databas-projekt.drawio.png)
+![ER-diagram](/images/Databas-projekt.drawio.png)
 
 ---
 
 ## Lärdomar
 
-* Spännande projekt att få bygga en lite större databas
-* Fortsätta lära oss mer om triggers och hur man använder dom
+* Erfarenhet av att designa och implementera en större relationsdatabas
+* Fördjupad förståelse för triggers och hur de används för dataintegritet
 * Stored procedures för återanvändbar logik
-* Indexering för bättre prestanda
+* Användning av index för att optimera prestanda vid queries
 
 ---
 
@@ -143,14 +143,32 @@ Databasens struktur visas här:
 
 ## Filer i projektet
 
-* `README.md`
-* `Databas-projekt.drawio.png`
-* `nhl_database.sql`
+* `README.md` – projektbeskrivning
+* `images/Databas-projekt.drawio.png` – ER-diagram
+
+### Databasfiler
+
+* `database/schema.sql` – CREATE TABLE-satser
+* `database/triggers.sql` – triggers
+* `database/procedures.sql` – stored procedures
+* `database/seed.sql` – testdata (INSERT)
+* `database/queries.sql` – exempel på queries
+* `database/nhl_database.sql` – komplett script (alla delar i en fil)
 
 ---
 
-### 🚧 Status
+## Hur man kör projektet
 
-**WORK IN PROGRESS**
+1. Kör `schema.sql` för att skapa tabeller
+2. Kör `triggers.sql`
+3. Kör `procedures.sql`
+4. Kör `seed.sql` för att lägga in testdata
+5. Kör `queries.sql` eller anropa stored procedures
 
-*Ändringar kommer ske med tiden*
+Exempel:
+
+```sql
+CALL get_points_leaderboard_by_season(20232024);
+```
+
+---
