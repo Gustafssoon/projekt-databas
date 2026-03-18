@@ -103,8 +103,6 @@ CREATE TABLE team_game_stats (
 -- 	TESTDATA
 -- ============
 
-USE nhl_database;
-
 -- TEAM
 INSERT INTO team (team_id, name, city, abbreviation)
 VALUES
@@ -182,8 +180,7 @@ VALUES
 -- TEAM_GAME_STATS
 INSERT INTO team_game_stats (
     team_game_stats_id,
-    team_id
-    ,
+    team_id,
     game_id,
     shots,
     hits,
