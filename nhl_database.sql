@@ -96,3 +96,165 @@ CREATE TABLE team_game_stats (
     FOREIGN KEY (game_id) REFERENCES game(game_id),
     UNIQUE KEY uq_team_game (team_id, game_id)
 );
+
+
+-- ============
+-- 	TESTDATA
+-- ============
+
+USE nhl_database;
+
+-- TEAM
+INSERT INTO team (team_id, name, city, abbreviation)
+VALUES
+(1, 'Maple Leafs', 'Toronto', 'TOR'),
+(2, 'Canadiens', 'Montreal', 'MTL');
+
+-- SEASON
+INSERT INTO season (season_id, label, start_date, end_date, is_current)
+VALUES
+(20232024, '2023/2024', '2023-10-01', '2024-06-30', TRUE);
+
+-- PLAYER
+INSERT INTO player (player_id, first_name, last_name, birth_date, nationality, shoot_catches, primary_position, active)
+VALUES
+(101, 'Auston', 'Matthews', '1997-09-17', 'Canada', 'L', 'C', TRUE),
+(102, 'Mitch', 'Marner', '1997-05-05', 'Canada', 'R', 'RW', TRUE),
+(103, 'Nick', 'Suzuki', '1999-08-10', 'Canada', 'R', 'C', TRUE),
+(104, 'Cole', 'Caufield', '2001-01-02', 'USA', 'R', 'RW', TRUE);
+
+-- PLAYER_TEAM_SEASON
+INSERT INTO player_team_season (
+    player_team_season_id,
+    player_id,
+    team_id,
+    season_id,
+    jersey_number,
+    listed_position,
+    start_date,
+    end_date
+)
+VALUES
+(1, 101, 1, 20232024, '34', 'C', '2023-10-01', NULL),
+(2, 102, 1, 20232024, '16', 'RW', '2023-10-01', NULL),
+(3, 103, 2, 20232024, '14', 'C', '2023-10-01', NULL),
+(4, 104, 2, 20232024, '22', 'RW', '2023-10-01', NULL);
+
+-- GAME
+INSERT INTO game (
+    game_id,
+    home_team_id,
+    away_team_id,
+    season_id,
+    game_date,
+    game_type,
+    status,
+    home_score,
+    away_score,
+    overtime_flag,
+    shootout_flag
+)
+VALUES
+(1001, 1, 2, 20232024, '2023-11-10', 'Regular Season', 'Final', 4, 2, FALSE, FALSE);
+
+-- PLAYER_GAME_STATS
+INSERT INTO player_game_stats (
+    player_game_stats_id,
+    game_id,
+    player_id,
+    team_id,
+    goals,
+    assists,
+    points,
+    shots,
+    hits,
+    pim,
+    toi_seconds,
+    plus_minus
+)
+VALUES
+(1, 1001, 101, 1, 2, 1, 3, 6, 2, 0, 1260, 2),
+(2, 1001, 102, 1, 1, 2, 3, 4, 1, 2, 1185, 1),
+(3, 1001, 103, 2, 1, 0, 1, 5, 3, 0, 1210, -1),
+(4, 1001, 104, 2, 1, 1, 2, 4, 2, 0, 1150, -1);
+
+-- TEAM_GAME_STATS
+INSERT INTO team_game_stats (
+    team_game_stats_id,
+    team_id
+    ,
+    game_id,
+    shots,
+    hits,
+    pim,
+    faceoff_win_pct,
+    powerplay_goals,
+    powerplay_opportunities
+)
+VALUES
+(1, 1, 1001, 32, 18, 4, 52.30, 1, 3),
+(2, 2, 1001, 29, 21, 2, 47.70, 0, 2);
+
+-- ========
+-- SELECTS
+-- ========
+
+-- Visa alla spelare
+SELECT * FROM player;
+-- Visa alla matcher
+SELECT * FROM game;
+-- Visa spelarstatistik för matchen
+SELECT * FROM player_game_stats;
+-- Visa lagstatistik för matchen
+SELECT * FROM team_game_stats;
+
+-- flest poäng i säsongen
+SELECT
+    p.player_id,
+    p.first_name,
+    p.last_name,
+    SUM(pgs.points) AS total_points
+FROM player_game_stats pgs
+JOIN player p ON p.player_id = pgs.player_id
+JOIN game g ON g.game_id = pgs.game_id
+WHERE g.season_id = 20232024
+GROUP BY p.player_id, p.first_name, p.last_name
+ORDER BY total_points DESC;
+
+-- flest tacklingar i säsongen
+SELECT
+    p.player_id,
+    p.first_name,
+    p.last_name,
+    SUM(pgs.hits) AS total_hits
+FROM player_game_stats pgs
+JOIN player p ON p.player_id = pgs.player_id
+JOIN game g ON g.game_id = pgs.game_id
+WHERE g.season_id = 20232024
+GROUP BY p.player_id, p.first_name, p.last_name
+ORDER BY total_hits DESC;
+
+-- matchinfo med lag
+SELECT
+    g.game_id,
+    ht.name AS home_team,
+    at.name AS away_team,
+    g.game_date,
+    g.home_score,
+    g.away_score,
+    g.status
+FROM game g
+JOIN team ht ON g.home_team_id = ht.team_id
+JOIN team at ON g.away_team_id = at.team_id;
+
+-- vilken klubb spelaren tillhör i säsongen
+SELECT
+    p.first_name,
+    p.last_name,
+    t.name AS team_name,
+    s.label AS season_label,
+    pts.jersey_number
+FROM player_team_season pts
+JOIN player p ON pts.player_id = p.player_id
+JOIN team t ON pts.team_id = t.team_id
+JOIN season s ON pts.season_id = s.season_id;
