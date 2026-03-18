@@ -1,4 +1,4 @@
-# 📃 NHL-databas
+# NHL-databas
 
 *Slutprojekt i Databaser (YH25)*
 
