@@ -1,4 +1,4 @@
-DROP DATABASE nhl_database;
+DROP DATABASE IF EXISTS nhl_database;
 CREATE DATABASE nhl_database;
 USE nhl_database;
 
@@ -17,7 +17,7 @@ CREATE TABLE team (
     team_id INT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     city VARCHAR(100) NOT NULL,
-    abbreviation VARCHAR(10) NOT NULL
+    abbreviation VARCHAR(10) NOT NULL UNIQUE
 );
 
 CREATE TABLE season (
@@ -40,6 +40,7 @@ CREATE TABLE player_team_season (
     FOREIGN KEY (player_id) REFERENCES player(player_id),
     FOREIGN KEY (team_id) REFERENCES team(team_id),
     FOREIGN KEY (season_id) REFERENCES season(season_id),
+    UNIQUE KEY uq_player_team_season (player_id, team_id, season_id),
     INDEX idx_pts_player_season (player_id, season_id)
 );
 
