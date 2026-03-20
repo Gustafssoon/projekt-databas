@@ -1,0 +1,19 @@
+import requests
+
+
+BASE_URL = "https://api-web.nhle.com/v1"
+STATS_BASE_URL = "https://api.nhle.com/stats/rest/en"
+
+
+def get_player(player_id: int) -> dict:
+    url = f"{BASE_URL}/player/{player_id}/landing"
+    response = requests.get(url, timeout=10)
+    response.raise_for_status()
+    return response.json()
+
+
+def get_teams() -> dict:
+    url = f"{STATS_BASE_URL}/team"
+    response = requests.get(url, timeout=10)
+    response.raise_for_status()
+    return response.json()

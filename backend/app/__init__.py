@@ -13,6 +13,7 @@ from .extensions import db, migrate
 from config import Config
 from flask import Flask, jsonify
 from .admin import setup_admin
+from .services.import_service import import_player, import_team_by_abbreviation, import_season
 
 
 def create_app():
@@ -42,5 +43,33 @@ def create_app():
         ]
 
         return jsonify(data)
+
+    @app.route("/import-player/<int:player_id>")
+    def import_player_route(player_id):
+        player = import_player(player_id)
+        return {
+            "message": "Player imported successfully",
+            "player_id": player.player_id,
+            "name": f"{player.first_name} {player.last_name}",
+        }
+
+    @app.route("/import-team/<team_code>")
+    def import_team_route(team_code):
+        team = import_team_by_abbreviation(team_code)
+        return {
+            "message": "Team imported successfully",
+            "team_id": team.team_id,
+            "name": team.name,
+            "abbreviation": team.abbreviation,
+        }
+
+    @app.route("/import-season/<int:season_id>")
+    def import_season_route(season_id):
+        season = import_season(season_id)
+        return {
+            "message": "Season imported successfully",
+            "season_id": season.season_id,
+            "label": season.label,
+        }
 
     return app
