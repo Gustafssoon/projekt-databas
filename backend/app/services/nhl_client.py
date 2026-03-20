@@ -17,3 +17,17 @@ def get_teams() -> dict:
     response = requests.get(url, timeout=10)
     response.raise_for_status()
     return response.json()
+
+
+def get_team_schedule(team_code: str, season_id: int) -> dict:
+    url = f"{BASE_URL}/club-schedule-season/{team_code}/{season_id}"
+    response = requests.get(url, timeout=10)
+    response.raise_for_status()
+    return response.json()
+
+
+def get_game_landing(game_id: int) -> dict:
+    url = f"{BASE_URL}/gamecenter/{game_id}/landing"
+    response = requests.get(url, timeout=10)
+    response.raise_for_status()
+    return response.json()

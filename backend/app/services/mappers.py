@@ -45,3 +45,23 @@ def build_season(season_id: int) -> dict:
         "end_date": date(end_year, 6, 30),
         "is_current": False,
     }
+
+
+def parse_date(value: str):
+    return datetime.strptime(value, "%Y-%m-%d").date()
+
+
+def map_game(game_data: dict) -> dict:
+    return {
+        "game_id": game_data["id"],
+        "home_team_id": game_data["homeTeam"]["id"],
+        "away_team_id": game_data["awayTeam"]["id"],
+        "season_id": game_data["season"],
+        "game_date": parse_date(game_data["gameDate"]),
+        "game_type": str(game_data.get("gameType", "Unknown")),
+        "status": game_data.get("gameState", "Unknown"),
+        "home_score": game_data["homeTeam"].get("score", 0),
+        "away_score": game_data["awayTeam"].get("score", 0),
+        "overtime_flag": game_data.get("periodDescriptor", {}).get("periodType") == "OT",
+        "shootout_flag": game_data.get("gameOutcome", {}).get("lastPeriodType") == "SO",
+    }

@@ -13,7 +13,7 @@ from .extensions import db, migrate
 from config import Config
 from flask import Flask, jsonify
 from .admin import setup_admin
-from .services.import_service import import_player, import_team_by_abbreviation, import_season
+from .services.import_service import import_player, import_team_by_abbreviation, import_season, import_games_for_team_and_season
 
 
 def create_app():
@@ -70,6 +70,16 @@ def create_app():
             "message": "Season imported successfully",
             "season_id": season.season_id,
             "label": season.label,
+        }
+
+    @app.route("/import-games/<team_code>/<int:season_id>")
+    def import_games_route(team_code, season_id):
+        count = import_games_for_team_and_season(team_code, season_id)
+        return {
+            "message": "Games imported successfully",
+            "team_code": team_code.upper(),
+            "season_id": season_id,
+            "count": count,
         }
 
     return app
