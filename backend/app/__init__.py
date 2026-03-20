@@ -14,7 +14,7 @@ from config import Config
 from flask import Flask, jsonify
 from .admin import setup_admin
 from .services.import_service import (import_player, import_team_by_abbreviation,
-                                      import_season, import_games_for_team_and_season, import_player_team_season)
+                                      import_season, import_games_for_team_and_season, import_player_team_season, import_team_game_stats)
 
 
 def create_app():
@@ -90,6 +90,15 @@ def create_app():
             "message": "Roster imported successfully",
             "team_code": team_code.upper(),
             "season_id": season_id,
+            "count": count,
+        }
+
+    @app.route("/import-team-game-stats/<int:game_id>")
+    def import_team_game_stats_route(game_id):
+        count = import_team_game_stats(game_id)
+        return {
+            "message": "Team game stats imported successfully",
+            "game_id": game_id,
             "count": count,
         }
 

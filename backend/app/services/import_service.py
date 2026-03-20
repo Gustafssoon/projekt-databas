@@ -2,10 +2,11 @@ from app.models.game import Game
 from app.models.season import Season
 from app.models.player import Player
 from app.models.team import Team
+from app.models.team_game_stats import TeamGameStats
 from app.models.player_team_season import PlayerTeamSeason
 from app.extensions import db
-from app.services.nhl_client import get_player, get_teams, get_team_schedule, get_team_roster
-from app.services.mappers import map_player, map_team, map_game, build_season, map_player_team_season
+from app.services.nhl_client import get_player, get_teams, get_team_schedule, get_team_roster, get_game_right_rail
+from app.services.mappers import map_player, map_team, map_game, build_season, map_player_team_season, extract_team_game_stats, map_team_game_stats
 
 
 def import_player(player_id: int) -> Player:
@@ -161,6 +162,59 @@ def import_player_team_season(team_code: str, season_id: int) -> int:
                 PlayerTeamSeason.player_team_season_id), 0)).scalar() + 1
             mapped["player_team_season_id"] = next_id
             db.session.add(PlayerTeamSeason(**mapped))
+
+        imported_count += 1
+
+    db.session.commit()
+    return imported_count
+
+
+def import_team_game_stats(game_id: int) -> int:
+    data = get_game_right_rail(game_id)
+
+    game = db.session.get(Game, game_id)
+    if not game:
+        raise ValueError(f"Game {game_id} does not exist in database")
+
+    away_team_id = game.away_team_id
+    home_team_id = game.home_team_id
+
+    raw_team_stats = data.get("teamGameStats", [])
+
+    away_stats = extract_team_game_stats(raw_team_stats, "away")
+    home_stats = extract_team_game_stats(raw_team_stats, "home")
+
+    rows = [
+        map_team_game_stats(game_id, away_team_id, away_stats),
+        map_team_game_stats(game_id, home_team_id, home_stats),
+    ]
+
+    imported_count = 0
+
+    for mapped in rows:
+        existing = TeamGameStats.query.filter_by(
+            game_id=mapped["game_id"],
+            team_id=mapped["team_id"],
+        ).first()
+
+        if existing:
+            existing.shots = mapped["shots"]
+            existing.hits = mapped["hits"]
+            existing.pim = mapped["pim"]
+            existing.faceoff_win_pct = mapped["faceoff_win_pct"]
+            existing.powerplay_goals = mapped["powerplay_goals"]
+            existing.powerplay_opportunities = mapped["powerplay_opportunities"]
+        else:
+            next_id = (
+                db.session.query(
+                    db.func.coalesce(db.func.max(
+                        TeamGameStats.team_game_stats_id), 0)
+                ).scalar()
+                + 1
+            )
+
+            mapped["team_game_stats_id"] = next_id
+            db.session.add(TeamGameStats(**mapped))
 
         imported_count += 1
 

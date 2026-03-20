@@ -77,3 +77,46 @@ def map_player_team_season(player_id: int, team_id: int, season_id: int, player_
         "start_date": None,
         "end_date": None,
     }
+
+
+def parse_power_play(value: str) -> tuple[int, int]:
+    if not value:
+        return 0, 0
+
+    goals, opportunities = value.split("/")
+    return int(goals), int(opportunities)
+
+
+def extract_team_game_stats(team_game_stats: list[dict], side: str) -> dict:
+    stats = {}
+
+    for item in team_game_stats:
+        category = item.get("category")
+        value_key = "awayValue" if side == "away" else "homeValue"
+        stats[category] = item.get(value_key)
+
+    powerplay_goals, powerplay_opportunities = parse_power_play(
+        stats.get("powerPlay", "0/0")
+    )
+
+    return {
+        "shots": stats.get("sog", 0),
+        "hits": stats.get("hits", 0),
+        "pim": stats.get("pim", 0),
+        "faceoff_win_pct": round(float(stats.get("faceoffWinningPctg", 0)) * 100, 2),
+        "powerplay_goals": powerplay_goals,
+        "powerplay_opportunities": powerplay_opportunities,
+    }
+
+
+def map_team_game_stats(game_id: int, team_id: int, extracted_stats: dict) -> dict:
+    return {
+        "game_id": game_id,
+        "team_id": team_id,
+        "shots": extracted_stats["shots"],
+        "hits": extracted_stats["hits"],
+        "pim": extracted_stats["pim"],
+        "faceoff_win_pct": extracted_stats["faceoff_win_pct"],
+        "powerplay_goals": extracted_stats["powerplay_goals"],
+        "powerplay_opportunities": extracted_stats["powerplay_opportunities"],
+    }
