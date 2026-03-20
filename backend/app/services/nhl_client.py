@@ -31,3 +31,10 @@ def get_game_landing(game_id: int) -> dict:
     response = requests.get(url, timeout=10)
     response.raise_for_status()
     return response.json()
+
+
+def get_team_roster(team_code: str, season_id: int) -> dict:
+    url = f"{BASE_URL}/roster/{team_code}/{season_id}"
+    response = requests.get(url, timeout=10)
+    response.raise_for_status()
+    return response.json()

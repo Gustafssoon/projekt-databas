@@ -1,11 +1,11 @@
 from app.models.game import Game
 from app.models.season import Season
-from app.services.mappers import build_season
-from app.extensions import db
 from app.models.player import Player
 from app.models.team import Team
-from app.services.nhl_client import get_player, get_teams, get_team_schedule
-from app.services.mappers import map_player, map_team, map_game
+from app.models.player_team_season import PlayerTeamSeason
+from app.extensions import db
+from app.services.nhl_client import get_player, get_teams, get_team_schedule, get_team_roster
+from app.services.mappers import map_player, map_team, map_game, build_season, map_player_team_season
 
 
 def import_player(player_id: int) -> Player:
@@ -112,6 +112,55 @@ def import_games_for_team_and_season(team_code: str, season_id: int) -> int:
                 setattr(existing_game, key, value)
         else:
             db.session.add(Game(**mapped))
+
+        imported_count += 1
+
+    db.session.commit()
+    return imported_count
+
+
+def import_player_team_season(team_code: str, season_id: int) -> int:
+    import_season(season_id)
+
+    team = import_team_by_abbreviation(team_code)
+    roster_data = get_team_roster(team_code, season_id)
+
+    imported_count = 0
+
+    all_players = []
+
+    for group in roster_data.values():
+        if isinstance(group, list):
+            all_players.extend(group)
+
+    for player_data in all_players:
+        player_id = player_data["id"]
+
+        import_player(player_id)
+
+        mapped = map_player_team_season(
+            player_id=player_id,
+            team_id=team.team_id,
+            season_id=season_id,
+            player_data=player_data,
+        )
+
+        existing = PlayerTeamSeason.query.filter_by(
+            player_id=mapped["player_id"],
+            team_id=mapped["team_id"],
+            season_id=mapped["season_id"],
+        ).first()
+
+        if existing:
+            existing.jersey_number = mapped["jersey_number"]
+            existing.listed_position = mapped["listed_position"]
+            existing.start_date = mapped["start_date"]
+            existing.end_date = mapped["end_date"]
+        else:
+            next_id = db.session.query(db.func.coalesce(db.func.max(
+                PlayerTeamSeason.player_team_season_id), 0)).scalar() + 1
+            mapped["player_team_season_id"] = next_id
+            db.session.add(PlayerTeamSeason(**mapped))
 
         imported_count += 1
 
