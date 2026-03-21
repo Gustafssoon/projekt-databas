@@ -4,9 +4,10 @@ from app.models.player import Player
 from app.models.team import Team
 from app.models.team_game_stats import TeamGameStats
 from app.models.player_team_season import PlayerTeamSeason
+from app.models.player_game_stats import PlayerGameStats
 from app.extensions import db
-from app.services.nhl_client import get_player, get_teams, get_team_schedule, get_team_roster, get_game_right_rail
-from app.services.mappers import map_player, map_team, map_game, build_season, map_player_team_season, extract_team_game_stats, map_team_game_stats
+from app.services.nhl_client import get_player, get_teams, get_team_schedule, get_team_roster, get_game_right_rail, get_game_boxscore
+from app.services.mappers import map_player, map_team, map_game, build_season, map_player_team_season, extract_team_game_stats, map_team_game_stats, map_player_game_stats
 
 
 def import_player(player_id: int) -> Player:
@@ -217,6 +218,72 @@ def import_team_game_stats(game_id: int) -> int:
             db.session.add(TeamGameStats(**mapped))
 
         imported_count += 1
+
+    db.session.commit()
+    return imported_count
+
+
+def import_player_game_stats(game_id: int) -> int:
+    data = get_game_boxscore(game_id)
+
+    game = db.session.get(Game, game_id)
+    if not game:
+        raise ValueError(f"Game {game_id} does not exist in database")
+
+    away_team_id = game.away_team_id
+    home_team_id = game.home_team_id
+
+    away_team_players = data.get("playerByGameStats", {}).get("awayTeam", {})
+    home_team_players = data.get("playerByGameStats", {}).get("homeTeam", {})
+
+    imported_count = 0
+
+    def process_team_players(team_data: dict, team_id: int):
+        nonlocal imported_count
+
+        for group_name in ["forwards", "defense", "goalies"]:
+            players = team_data.get(group_name, [])
+
+            for player_data in players:
+                player_id = player_data["playerId"]
+
+                import_player(player_id)
+
+                mapped = map_player_game_stats(game_id, team_id, player_data)
+
+                existing = PlayerGameStats.query.filter_by(
+                    game_id=mapped["game_id"],
+                    player_id=mapped["player_id"],
+                ).first()
+
+                if existing:
+                    existing.team_id = mapped["team_id"]
+                    existing.goals = mapped["goals"]
+                    existing.assists = mapped["assists"]
+                    existing.points = mapped["points"]
+                    existing.shots = mapped["shots"]
+                    existing.hits = mapped["hits"]
+                    existing.pim = mapped["pim"]
+                    existing.toi_seconds = mapped["toi_seconds"]
+                    existing.plus_minus = mapped["plus_minus"]
+                else:
+                    next_id = (
+                        db.session.query(
+                            db.func.coalesce(
+                                db.func.max(
+                                    PlayerGameStats.player_game_stats_id), 0
+                            )
+                        ).scalar()
+                        + 1
+                    )
+
+                    mapped["player_game_stats_id"] = next_id
+                    db.session.add(PlayerGameStats(**mapped))
+
+                imported_count += 1
+
+    process_team_players(away_team_players, away_team_id)
+    process_team_players(home_team_players, home_team_id)
 
     db.session.commit()
     return imported_count

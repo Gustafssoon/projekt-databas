@@ -120,3 +120,27 @@ def map_team_game_stats(game_id: int, team_id: int, extracted_stats: dict) -> di
         "powerplay_goals": extracted_stats["powerplay_goals"],
         "powerplay_opportunities": extracted_stats["powerplay_opportunities"],
     }
+
+
+def toi_to_seconds(toi: str) -> int:
+    if not toi:
+        return 0
+
+    minutes, seconds = toi.split(":")
+    return int(minutes) * 60 + int(seconds)
+
+
+def map_player_game_stats(game_id: int, team_id: int, player_data: dict) -> dict:
+    return {
+        "game_id": game_id,
+        "player_id": player_data["playerId"],
+        "team_id": team_id,
+        "goals": player_data.get("goals", 0),
+        "assists": player_data.get("assists", 0),
+        "points": player_data.get("points", 0),
+        "shots": player_data.get("sog", 0),
+        "hits": player_data.get("hits", 0),
+        "pim": player_data.get("pim", 0),
+        "toi_seconds": toi_to_seconds(player_data.get("toi", "00:00")),
+        "plus_minus": player_data.get("plusMinus", 0),
+    }
