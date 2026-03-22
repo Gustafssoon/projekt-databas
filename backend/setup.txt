@@ -1,10 +1,30 @@
 
+1. Skapa och aktivera virtuell miljö
+python -m venv .venv
+.venv/Scripts/Activate.ps1
 
-1.migreara tabeller från vscode: 
+2. Installera paket
+pip install -r requirements.txt
 
-flask db upgrade 
+3. Skapa tabeller
+flask db upgrade
 
-2. trigger och procedure via workbench:
+
+1. Skapa och aktivera virtuell miljö
+python -m venv .venv
+.venv/Scripts/Activate.ps1
+
+2. Installera paket
+pip install -r requirements.txt
+
+3. Skapa tabeller
+flask db upgrade
+
+4. Starta backend
+flask run
+
+5. Kör SQL i Workbench för trigger + stored procedure
+Stored procedure:
 
 DELIMITER $$
 
@@ -20,6 +40,8 @@ END$$
 
 DELIMITER ;
 
+
+Triggers:
 DELIMITER $$
 
 -- Sätter points automatiskt vid INSERT
@@ -40,23 +62,10 @@ END$$
 
 DELIMITER ;
 
-3. i terminalen: 
-.venv/Scripts/Activate.ps1 (typ)
-flask run
-
-4. endpoint för att hämta grunddata:
+6. Importera grunddata
 http://127.0.0.1:5000/import-season-basics/TOR/20232024
 http://127.0.0.1:5000/import-season-basics/MTL/20232024
 
-5. hämta statistik för matcher:
+7. Importera statistik
 http://127.0.0.1:5000/import-season-stats-test/TOR/20232024
 http://127.0.0.1:5000/import-season-stats-test/MTL/20232024
-
-
-
-TODO:
-0.5 SETUP fil + python kommandon för att installera paket osv.
-1. livedata + nuvarande säsong 2025/2026
-2. headshots i edit view + customizea player tabell
-3.ta bort start_date och end_date i player_team_season + uppdatera ER-diagram (KOM IHÅG ATT ÄNDRA I MODELS I PYTHON)
-4. routes från app/__init__ till /routes
