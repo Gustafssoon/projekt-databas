@@ -182,6 +182,14 @@ Databasens struktur visas här:
 
 ---
 
+## Backend
+
+Projektet innehåller även en enkel backend byggd i Flask. Backenden används för att importera data från NHL API och spara den i databasen. Den innehåller modeller, importlogik, API-anrop och en enkel adminpanel via Flask-Admin.
+
+Detta gör det möjligt att automatisera inläsning av spelare, lag, matcher och statistik istället för att bara arbeta med manuell testdata.
+
+---
+
 ## Lärdomar
 
 Genom projektet har vi fått mer erfarenhet av att:
@@ -223,6 +231,7 @@ Genom projektet har vi fått mer erfarenhet av att:
 
 ## Hur man kör projektet
 
+### Databas
 1. Kör `schema.sql` för att skapa tabeller
 2. Kör `triggers.sql`
 3. Kör `procedures.sql`
@@ -230,10 +239,36 @@ Genom projektet har vi fått mer erfarenhet av att:
 5. Kör `security.sql` för att skapa användare och behörigheter
 6. Kör `queries.sql` eller anropa stored procedures
 
-Exempel:
-
-```sql
-CALL get_points_leaderboard_by_season(20232024);
+### Backend
+1. Gå till mappen backend/
+2. Installera beroenden med:
+```bash
+pip install -r requirements.txt
 ```
+3. Skapa en .env-fil med till exempel:
+```env
+DATABASE_URL=mysql+pymysql://root:yourpassword@localhost/nhl_database
+SECRET_KEY=your-secret-key
+```
+4. Starta applikationen med:
+```bash
+python run.py
+```
+5. Öppna sedan backenden i webbläsaren, till exempel:
+* `http://127.0.0.1:5000/`
+* `http://127.0.0.1:5000/players`
 
+#### Backenden innehåller också routes för att importera data från NHL API, till exempel:
+
+* `/import-player/<player_id>`
+* `/import-team/<team_code>`
+* `/import-season/<season_id>`
+* `/import-games/<team_code>/<season_id>`
+* `/import-roster/<team_code>/<season_id>`
+* `/import-team-game-stats/<game_id>`
+* `/import-player-game-stats/<game_id>`
+
+Exempel:
+* `http://127.0.0.1:5000/import-team/TOR`
+* `http://127.0.0.1:5000/import-season/20232024`
 ---
