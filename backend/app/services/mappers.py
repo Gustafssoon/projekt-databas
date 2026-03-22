@@ -1,5 +1,4 @@
 from datetime import date, datetime
-from datetime import datetime
 
 
 def parse_birth_date(value):
@@ -74,8 +73,6 @@ def map_player_team_season(player_id: int, team_id: int, season_id: int, player_
         "season_id": season_id,
         "jersey_number": str(player_data.get("sweaterNumber")) if player_data.get("sweaterNumber") else None,
         "listed_position": player_data.get("positionCode"),
-        "start_date": None,
-        "end_date": None,
     }
 
 

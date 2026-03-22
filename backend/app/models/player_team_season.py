@@ -2,6 +2,7 @@ from app.extensions import db
 
 
 class PlayerTeamSeason(db.Model):
+
     __tablename__ = "player_team_season"
 
     player_team_season_id = db.Column(db.Integer, primary_key=True)
@@ -11,10 +12,9 @@ class PlayerTeamSeason(db.Model):
         "team.team_id"), nullable=False)
     season_id = db.Column(db.Integer, db.ForeignKey(
         "season.season_id"), nullable=False)
+
     jersey_number = db.Column(db.String(10), nullable=True)
     listed_position = db.Column(db.String(20), nullable=True)
-    start_date = db.Column(db.Date, nullable=True)
-    end_date = db.Column(db.Date, nullable=True)
 
     __table_args__ = (
         db.UniqueConstraint(

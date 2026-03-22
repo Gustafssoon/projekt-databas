@@ -156,11 +156,12 @@ def import_player_team_season(team_code: str, season_id: int) -> int:
         if existing:
             existing.jersey_number = mapped["jersey_number"]
             existing.listed_position = mapped["listed_position"]
-            existing.start_date = mapped["start_date"]
-            existing.end_date = mapped["end_date"]
         else:
-            next_id = db.session.query(db.func.coalesce(db.func.max(
-                PlayerTeamSeason.player_team_season_id), 0)).scalar() + 1
+            next_id = db.session.query(
+                db.func.coalesce(
+                    db.func.max(PlayerTeamSeason.player_team_season_id), 0
+                )
+            ).scalar() + 1
             mapped["player_team_season_id"] = next_id
             db.session.add(PlayerTeamSeason(**mapped))
 
