@@ -13,8 +13,8 @@ from .extensions import db, migrate
 from config import Config
 from flask import Flask, jsonify
 from .admin import setup_admin
-from .services.import_service import (import_player, import_team_by_abbreviation,
-                                      import_season, import_games_for_team_and_season, import_player_team_season, import_team_game_stats, import_player_game_stats,)
+from .services.import_service import (import_player, import_team_by_abbreviation, import_season_stats_limited, import_season_basics, import_season,
+                                      import_games_for_team_and_season, import_player_team_season, import_team_game_stats, import_player_game_stats,)
 
 
 def create_app():
@@ -109,6 +109,22 @@ def create_app():
             "message": "Player game stats imported successfully",
             "game_id": game_id,
             "count": count,
+        }
+
+    @app.route("/import-season-basics/<team_code>/<int:season_id>")
+    def import_season_basics_route(team_code, season_id):
+        result = import_season_basics(team_code, season_id)
+        return {
+            "message": "Season basics imported successfully",
+            **result,
+        }
+
+    @app.route("/import-season-stats-test/<team_code>/<int:season_id>")
+    def import_season_stats_test_route(team_code, season_id):
+        result = import_season_stats_limited(team_code, season_id, limit=5)
+        return {
+            "message": "Season stats test import completed successfully",
+            **result,
         }
 
     return app

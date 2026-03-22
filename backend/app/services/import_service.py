@@ -287,3 +287,43 @@ def import_player_game_stats(game_id: int) -> int:
 
     db.session.commit()
     return imported_count
+
+
+def import_season_basics(team_code: str, season_id: int) -> dict:
+    import_season(season_id)
+    team = import_team_by_abbreviation(team_code)
+    roster_count = import_player_team_season(team_code, season_id)
+    games_count = import_games_for_team_and_season(team_code, season_id)
+
+    return {
+        "team_code": team_code.upper(),
+        "season_id": season_id,
+        "team_id": team.team_id,
+        "roster_count": roster_count,
+        "games_count": games_count,
+    }
+
+
+def import_season_stats_limited(team_code: str, season_id: int, limit: int = 5) -> dict:
+    team = import_team_by_abbreviation(team_code)
+
+    games = Game.query.filter_by(season_id=season_id).filter(
+        (Game.home_team_id == team.team_id) | (
+            Game.away_team_id == team.team_id)
+    ).limit(limit).all()
+
+    team_game_stats_count = 0
+    player_game_stats_count = 0
+
+    for game in games:
+        print(f"Importing stats for game {game.game_id}")
+        team_game_stats_count += import_team_game_stats(game.game_id)
+        player_game_stats_count += import_player_game_stats(game.game_id)
+
+    return {
+        "team_code": team_code.upper(),
+        "season_id": season_id,
+        "games_processed": len(games),
+        "team_game_stats_count": team_game_stats_count,
+        "player_game_stats_count": player_game_stats_count,
+    }
