@@ -1,6 +1,6 @@
 -- Skapa användare
-CREATE USER 'admin_user'@'localhost' IDENTIFIED BY 'admin123';
-CREATE USER 'analyst_user'@'localhost' IDENTIFIED BY 'analyst123';
+CREATE USER IF NOT EXISTS 'admin_user'@'localhost' IDENTIFIED BY 'admin123';
+CREATE USER IF NOT EXISTS 'analyst_user'@'localhost' IDENTIFIED BY 'analyst123';
 
 -- Ge admin full tillgång till databasen
 GRANT ALL PRIVILEGES ON nhl_database.* TO 'admin_user'@'localhost';
@@ -12,3 +12,9 @@ GRANT SELECT ON nhl_database.* TO 'analyst_user'@'localhost';
 REVOKE INSERT, UPDATE, DELETE ON nhl_database.* FROM 'analyst_user'@'localhost';
 
 FLUSH PRIVILEGES;
+
+-- Test som analyst_user:
+--SELECT * FROM player;
+
+-- Detta ska inte fungera:
+--DELETE FROM player WHERE player_id = 1;
