@@ -250,13 +250,14 @@ pip install -r requirements.txt
 DATABASE_URL=mysql+pymysql://root:yourpassword@localhost/nhl_database
 SECRET_KEY=your-secret-key
 ```
-4. Starta applikationen med:
+4. Starta Flask-applikationen med:
 ```bash
-python run.py
+flask run
 ```
 5. Öppna sedan backenden i webbläsaren, till exempel:
 * `http://127.0.0.1:5000/`
 * `http://127.0.0.1:5000/players`
+* `http://127.0.0.1:5000/admin`
 
 #### Backenden innehåller också routes för att importera data från NHL API, till exempel:
 
