@@ -8,7 +8,7 @@
 
 ## Projektbeskrivning
 
-I det här projektet har vi byggt en relationsdatabas för NHL-statistik. Tanken är att kunna lagra data från matcher och sedan använda den för att analysera hur spelare presterar.
+I det här projektet har vi byggt en relationsdatabas för NHL-statistik. Syftet är att lagra data från matcher och använda den för att analysera hur spelare och lag presterar över tid.
 
 Vi har valt att fokusera på statistik som:
 
@@ -22,6 +22,21 @@ Vi har valt att fokusera på statistik som:
 * +/-  (plus/minus)
 
 Databasen är designad för att hantera flera säsonger, så att man kan jämföra spelare över tid.
+
+---
+
+## Val av databastyp
+
+Vi valde en relationsdatabas eftersom projektet innehåller tydliga relationer mellan spelare, lag, matcher och säsonger. Datan behöver hög dataintegritet och struktur.
+
+En relationsdatabas passar bra i detta projekt eftersom vi behöver:
+
+* primärnycklar och främmande nycklar
+* tydliga relationer mellan tabeller
+* säkra och konsekventa datatyper
+* SQL-frågor med `JOIN` och `GROUP BY`
+
+Därför passar MySQL/PostgreSQL utmärkt för just denna lösning. Sen är de det vi lärde oss i skolan.
 
 ---
 
@@ -44,9 +59,24 @@ Databasen består av följande huvudtabeller:
 ## Relationer
 
 * En spelare kan spela i flera lag över olika säsonger
+* Ett lag deltar i flera matcher
 * En match spelas mellan två lag
 * Statistik lagras per spelare och match
-* Statistik aggregeras per säsong med hjälp av JOINs och GROUP BY i queries
+* Statistik kan aggregeras per säsong med hjälp av `JOIN` och `GROUP BY`
+
+---
+
+## Dataintegritet
+
+Databasen använder flera funktioner för att säkerställa dataintegritet:
+
+* **PRIMARY KEY** för unika rader
+* **FOREIGN KEY** för att säkerställa giltiga relationer mellan tabeller
+* **NOT NULL** för obligatoriska fält
+* **DEFAULT** där det är lämpligt
+* eventuella **CHECK-villkor** för att begränsa ogiltiga värden
+
+Syftet är att undvika inkonsekvent eller ogiltig data i databasen.
 
 ---
 
@@ -101,6 +131,35 @@ GROUP BY p.player_id
 ORDER BY total_hits DESC;
 ```
 
+Dessa queries visar hur databasen kan användas för att analysera statistik med hjälp av JOIN och GROUP BY.
+
+---
+
+Prestanda
+
+För att förbättra prestandan används index på kolumner som ofta förekommer i relationer och sökningar, till exempel player_id, team_id, game_id och season_id.
+
+Det gör det lättare att köra sammanställningar och frågor effektivt när databasen växer.
+
+---
+
+Säkerhet
+
+Projektet innehåller en enkel rollbaserad säkerhetsstrategi där olika användare får olika behörigheter.
+
+admin_user har full behörighet att läsa och ändra data
+analyst_user har endast behörighet att läsa statistik
+
+Detta hanteras med GRANT och REVOKE i filen security.sql.
+
+```sql
+GRANT ALL PRIVILEGES ON nhl_database.* TO 'admin_user'@'localhost';
+GRANT SELECT ON nhl_database.* TO 'analyst_user'@'localhost';
+REVOKE INSERT, UPDATE, DELETE ON nhl_database.* FROM 'analyst_user'@'localhost';
+```
+
+Säkerheten testades i MySQL Workbench genom att skapa separata anslutningar för admin_user och analyst_user. Administratören kunde ändra data, medan analytikern endast kunde läsa statistik.
+
 ---
 
 ## Testdata
@@ -123,19 +182,22 @@ Databasens struktur visas här:
 
 ---
 
-## Lärdomar
+Lärdomar
 
-* Erfarenhet av att designa och implementera en större relationsdatabas
-* Fördjupad förståelse för triggers och hur de används för dataintegritet
-* Stored procedures för återanvändbar logik
-* Användning av index för att optimera prestanda vid queries
+Genom projektet har vi fått mer erfarenhet av att:
+
+* Designa en relationsdatabas
+* Arbeta med dataintegritet
+* Använda triggers och stored procedures
+* Optimera queries med index
+* Tänka på säkerhet och behörigheter
 
 ---
 
 ## Möjlig vidareutveckling
 
-* Bygga en webbapplikation (frontend + API)
-* Importera live-data via NHL API
+* Bygga en webbapplikation ovanpå databasen
+* Hämta live-data via NHL API
 * Visualisering av data
 * Avancerad statistik (t.ex. Corsi, xG)
 
@@ -144,16 +206,18 @@ Databasens struktur visas här:
 ## Filer i projektet
 
 * `README.md` – projektbeskrivning
+* `docs/assignment.md` – uppgiftsbeskrivning
 * `images/Databas-projekt.drawio.png` – ER-diagram
 
 ### Databasfiler
 
-* `database/schema.sql` – CREATE TABLE-satser
+* `database/schema.sql` – tabeller
 * `database/triggers.sql` – triggers
 * `database/procedures.sql` – stored procedures
-* `database/seed.sql` – testdata (INSERT)
+* `database/seed.sql` – testdata
 * `database/queries.sql` – exempel på queries
-* `database/nhl_database.sql` – komplett script (alla delar i en fil)
+* `database/security.sql` – användare och behörigheter
+* `database/nhl_database.sql` – komplett script
 
 ---
 
@@ -163,7 +227,8 @@ Databasens struktur visas här:
 2. Kör `triggers.sql`
 3. Kör `procedures.sql`
 4. Kör `seed.sql` för att lägga in testdata
-5. Kör `queries.sql` eller anropa stored procedures
+5. Kör `security.sql` för att skapa användare och behörigheter
+6. Kör `queries.sql` eller anropa stored procedures
 
 Exempel:
 
