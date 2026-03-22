@@ -178,7 +178,7 @@ Projektet innehåller testdata för:
 
 Databasens struktur visas här:
 
-![ER-diagram](/images/Databas-projekt.drawio.png)
+![ER-diagram](/images/er-diagram.png)
 
 ---
 
