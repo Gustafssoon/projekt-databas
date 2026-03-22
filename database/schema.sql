@@ -11,6 +11,7 @@ CREATE TABLE player (
     shoot_catches VARCHAR(20) NOT NULL, -- anger om spelaren är höger eller vänsterfattad
     primary_position VARCHAR(20) NOT NULL,
     active BOOLEAN NOT NULL -- Om spelaren är aktiv
+	headshot_url VARCHAR(255) -- Bild på spelaren
 );
 
 CREATE TABLE team (
