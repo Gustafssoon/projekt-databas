@@ -257,7 +257,7 @@ CALL get_points_leaderboard_by_season(20232024);
 ```bash
 pip install -r requirements.txt
 ```
-3. Skapa en `.env-fil` med till exempel:
+3. Skapa en `.env`-fil med till exempel:
 ```env
 DATABASE_URL=mysql+pymysql://root:yourpassword@localhost/nhl_database
 SECRET_KEY=your-secret-key
@@ -283,11 +283,11 @@ flask run
 #### Importera data via backend
 När backenden är igång kan grunddata och statistik importeras från NHL API via följande routes.
 
-Importera grunddata
+##### Importera grunddata
 * `http://127.0.0.1:5000/import-season-basics/TOR/20232024`
 * `http://127.0.0.1:5000/import-season-basics/MTL/20232024`
 
-Importera statistik
+##### Importera statistik
 * `http://127.0.0.1:5000/import-season-stats-test/TOR/20232024`
 * `http://127.0.0.1:5000/import-season-stats-test/MTL/20232024`
 
