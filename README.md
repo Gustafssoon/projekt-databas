@@ -131,13 +131,13 @@ GROUP BY p.player_id
 ORDER BY total_hits DESC;
 ```
 
-Dessa queries visar hur databasen kan användas för att analysera statistik med hjälp av JOIN och GROUP BY.
+Dessa queries visar hur databasen kan användas för att analysera statistik med hjälp av `JOIN` och `GROUP BY`.
 
 ---
 
 ## Prestanda
 
-För att förbättra prestandan används index på kolumner som ofta förekommer i relationer och sökningar, till exempel player_id, team_id, game_id och season_id.
+För att förbättra prestandan används index på kolumner som ofta förekommer i relationer och sökningar, till exempel `player_id`, `team_id`, `game_id` och `season_id`.
 
 Det gör det lättare att köra sammanställningar och frågor effektivt när databasen växer.
 
@@ -147,10 +147,10 @@ Det gör det lättare att köra sammanställningar och frågor effektivt när da
 
 Projektet innehåller en enkel rollbaserad säkerhetsstrategi där olika användare får olika behörigheter.
 
-admin_user har full behörighet att läsa och ändra data
-analyst_user har endast behörighet att läsa statistik
+* `admin_user` har full behörighet att läsa och ändra data
+* `analyst_user` har endast behörighet att läsa statistik
 
-Detta hanteras med GRANT och REVOKE i filen security.sql.
+Detta hanteras med `GRANT` och `REVOKE` i filen `security.sql`.
 
 ```sql
 GRANT ALL PRIVILEGES ON nhl_database.* TO 'admin_user'@'localhost';
@@ -158,7 +158,7 @@ GRANT SELECT ON nhl_database.* TO 'analyst_user'@'localhost';
 REVOKE INSERT, UPDATE, DELETE ON nhl_database.* FROM 'analyst_user'@'localhost';
 ```
 
-Säkerheten testades i MySQL Workbench genom att skapa separata anslutningar för admin_user och analyst_user. Administratören kunde ändra data, medan analytikern endast kunde läsa statistik.
+Säkerheten testades i MySQL Workbench genom att skapa separata anslutningar för `admin_user` och `analyst_user`. Administratören kunde ändra data, medan analytikern endast kunde läsa statistik.
 
 ---
 
@@ -232,44 +232,65 @@ Genom projektet har vi fått mer erfarenhet av att:
 ## Hur man kör projektet
 
 ### Databas
-1. Kör `schema.sql` för att skapa tabeller
-2. Kör `triggers.sql`
-3. Kör `procedures.sql`
-4. Kör `seed.sql` för att lägga in testdata
-5. Kör `security.sql` för att skapa användare och behörigheter
-6. Kör `queries.sql` eller anropa stored procedures
 
-### Backend
-1. Gå till mappen backend/
+Det finns två sätt att sätta upp databasen: manuellt via SQL-filer eller via backend och migrationer.
+
+#### Alternativ 1 – manuellt via SQL
+
+1. Kör `database/schema.sql` för att skapa databasen och tabellerna
+2. Kör `database/triggers.sql` för att skapa triggers
+3. Kör `database/procedures.sql` för att skapa stored procedures
+4. Kör `database/security.sql` för att skapa användare och behörigheter
+5. Kör `database/seed.sql` om du vill lägga in den manuella testdatan
+6. Kör `database/queries.sql` eller anropa stored procedures för att testa databasen
+
+Exempel:
+
+```sql
+CALL get_points_leaderboard_by_season(20232024);
+```
+
+#### Alternativ 2 - via backend och migrationer
+
+1. Gå till mappen `backend/`
 2. Installera beroenden med:
 ```bash
 pip install -r requirements.txt
 ```
-3. Skapa en .env-fil med till exempel:
+3. Skapa en `.env-fil` med till exempel:
 ```env
 DATABASE_URL=mysql+pymysql://root:yourpassword@localhost/nhl_database
 SECRET_KEY=your-secret-key
 ```
-4. Starta Flask-applikationen med:
+4. Kör migrationerna för att skapa tabellerna:
+```bash
+flask db upgrade
+```
+5. Kör fortfarande `database/triggers.sql` och `database/procedures.sql` manuellt i MySQL Workbench, eftersom dessa inte skapas via migrationerna
+6. Kör `database/security.sql` för att skapa användare och behörigheter
+
+### Backend
+
+1. Starta Flask-applikationen från `backend/` med:
 ```bash
 flask run
 ```
-5. Öppna sedan backenden i webbläsaren, till exempel:
+2. Öppna sedan backenden i webbläsaren, till exempel:
 * `http://127.0.0.1:5000/`
 * `http://127.0.0.1:5000/players`
 * `http://127.0.0.1:5000/admin`
 
-#### Backenden innehåller också routes för att importera data från NHL API, till exempel:
+#### Importera data via backend
+När backenden är igång kan grunddata och statistik importeras från NHL API via följande routes.
 
-* `/import-player/<player_id>`
-* `/import-team/<team_code>`
-* `/import-season/<season_id>`
-* `/import-games/<team_code>/<season_id>`
-* `/import-roster/<team_code>/<season_id>`
-* `/import-team-game-stats/<game_id>`
-* `/import-player-game-stats/<game_id>`
+Importera grunddata
+* `http://127.0.0.1:5000/import-season-basics/TOR/20232024`
+* `http://127.0.0.1:5000/import-season-basics/MTL/20232024`
 
-Exempel:
-* `http://127.0.0.1:5000/import-team/TOR`
-* `http://127.0.0.1:5000/import-season/20232024`
+Importera statistik
+* `http://127.0.0.1:5000/import-season-stats-test/TOR/20232024`
+* `http://127.0.0.1:5000/import-season-stats-test/MTL/20232024`
+
+Dessa routes hämtar och sparar data för Toronto och Montréal för säsongen 2023/2024.
+
 ---
