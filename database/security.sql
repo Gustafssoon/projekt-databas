@@ -12,3 +12,13 @@ GRANT SELECT ON nhl_database.* TO 'analyst_user'@'localhost';
 REVOKE INSERT, UPDATE, DELETE ON nhl_database.* FROM 'analyst_user'@'localhost';
 
 FLUSH PRIVILEGES;
+
+-- =====
+-- TEST
+-- =====
+
+-- Test som analyst_user:
+SELECT * FROM player;
+
+-- Detta ska inte fungera:
+DELETE FROM player WHERE player_id = 1;
