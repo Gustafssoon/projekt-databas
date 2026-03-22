@@ -135,7 +135,7 @@ Dessa queries visar hur databasen kan användas för att analysera statistik med
 
 ---
 
-Prestanda
+## Prestanda
 
 För att förbättra prestandan används index på kolumner som ofta förekommer i relationer och sökningar, till exempel player_id, team_id, game_id och season_id.
 
@@ -143,7 +143,7 @@ Det gör det lättare att köra sammanställningar och frågor effektivt när da
 
 ---
 
-Säkerhet
+## Säkerhet
 
 Projektet innehåller en enkel rollbaserad säkerhetsstrategi där olika användare får olika behörigheter.
 
@@ -182,7 +182,7 @@ Databasens struktur visas här:
 
 ---
 
-Lärdomar
+## Lärdomar
 
 Genom projektet har vi fått mer erfarenhet av att:
 
