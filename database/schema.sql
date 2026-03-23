@@ -36,8 +36,6 @@ CREATE TABLE player_team_season (
     season_id INT NOT NULL,
     jersey_number VARCHAR(10),
     listed_position VARCHAR(20),
---    start_date DATE,	-- används inte just nu?
---    end_date DATE,	-- används inte just nu?
     FOREIGN KEY (player_id) REFERENCES player(player_id),
     FOREIGN KEY (team_id) REFERENCES team(team_id),
     FOREIGN KEY (season_id) REFERENCES season(season_id),
