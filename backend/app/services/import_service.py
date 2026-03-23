@@ -6,8 +6,24 @@ from app.models.team_game_stats import TeamGameStats
 from app.models.player_team_season import PlayerTeamSeason
 from app.models.player_game_stats import PlayerGameStats
 from app.extensions import db
-from app.services.nhl_client import get_player, get_teams, get_team_schedule, get_team_roster, get_game_right_rail, get_game_boxscore
-from app.services.mappers import map_player, map_team, map_game, build_season, map_player_team_season, extract_team_game_stats, map_team_game_stats, map_player_game_stats
+from app.services.nhl_client import (
+    get_player,
+    get_teams,
+    get_team_schedule,
+    get_team_roster,
+    get_game_right_rail,
+    get_game_boxscore,
+)
+from app.services.mappers import (
+    map_player,
+    map_team,
+    map_game,
+    build_season,
+    map_player_team_season,
+    extract_team_game_stats,
+    map_team_game_stats,
+    map_player_game_stats,
+)
 
 
 def import_player(player_id: int) -> Player:
@@ -32,8 +48,10 @@ def import_team_by_abbreviation(team_code: str) -> Team:
     data = get_teams()
     teams = data.get("data", [])
 
-    match = next((team for team in teams if team.get(
-        "triCode") == team_code.upper()), None)
+    match = next(
+        (team for team in teams if team.get("triCode") == team_code.upper()),
+        None,
+    )
     if not match:
         raise ValueError(f"Team not found: {team_code}")
 
@@ -128,7 +146,6 @@ def import_player_team_season(team_code: str, season_id: int) -> int:
     roster_data = get_team_roster(team_code, season_id)
 
     imported_count = 0
-
     all_players = []
 
     for group in roster_data.values():
@@ -157,12 +174,6 @@ def import_player_team_season(team_code: str, season_id: int) -> int:
             existing.jersey_number = mapped["jersey_number"]
             existing.listed_position = mapped["listed_position"]
         else:
-            next_id = db.session.query(
-                db.func.coalesce(
-                    db.func.max(PlayerTeamSeason.player_team_season_id), 0
-                )
-            ).scalar() + 1
-            mapped["player_team_season_id"] = next_id
             db.session.add(PlayerTeamSeason(**mapped))
 
         imported_count += 1
@@ -207,15 +218,6 @@ def import_team_game_stats(game_id: int) -> int:
             existing.powerplay_goals = mapped["powerplay_goals"]
             existing.powerplay_opportunities = mapped["powerplay_opportunities"]
         else:
-            next_id = (
-                db.session.query(
-                    db.func.coalesce(db.func.max(
-                        TeamGameStats.team_game_stats_id), 0)
-                ).scalar()
-                + 1
-            )
-
-            mapped["team_game_stats_id"] = next_id
             db.session.add(TeamGameStats(**mapped))
 
         imported_count += 1
@@ -268,17 +270,6 @@ def import_player_game_stats(game_id: int) -> int:
                     existing.toi_seconds = mapped["toi_seconds"]
                     existing.plus_minus = mapped["plus_minus"]
                 else:
-                    next_id = (
-                        db.session.query(
-                            db.func.coalesce(
-                                db.func.max(
-                                    PlayerGameStats.player_game_stats_id), 0
-                            )
-                        ).scalar()
-                        + 1
-                    )
-
-                    mapped["player_game_stats_id"] = next_id
                     db.session.add(PlayerGameStats(**mapped))
 
                 imported_count += 1
@@ -305,13 +296,20 @@ def import_season_basics(team_code: str, season_id: int) -> dict:
     }
 
 
-def import_season_stats_limited(team_code: str, season_id: int, limit: int = 5) -> dict:
+def import_season_stats_limited(
+    team_code: str, season_id: int, limit: int = 5
+) -> dict:
     team = import_team_by_abbreviation(team_code)
 
-    games = Game.query.filter_by(season_id=season_id).filter(
-        (Game.home_team_id == team.team_id) | (
-            Game.away_team_id == team.team_id)
-    ).limit(limit).all()
+    games = (
+        Game.query.filter_by(season_id=season_id)
+        .filter(
+            (Game.home_team_id == team.team_id)
+            | (Game.away_team_id == team.team_id)
+        )
+        .limit(limit)
+        .all()
+    )
 
     team_game_stats_count = 0
     player_game_stats_count = 0
