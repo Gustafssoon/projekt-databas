@@ -19,6 +19,7 @@ def map_player(api_data: dict) -> dict:
         "shoot_catches": api_data.get("shootsCatches", "Unknown"),
         "primary_position": api_data.get("position", "Unknown"),
         "active": api_data.get("isActive", True),
+        "headshot_url": api_data.get("headshot"),
     }
 
 

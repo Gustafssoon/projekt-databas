@@ -1,6 +1,8 @@
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 
+from .admin import PlayerAdmin
+
 from ..extensions import db
 from ..models.player import Player
 from ..models.team import Team
@@ -14,7 +16,7 @@ from ..models.team_game_stats import TeamGameStats
 def setup_admin(app):
     admin = Admin(app, name="NHL Admin")
 
-    admin.add_view(ModelView(Player, db.session))
+    admin.add_view(PlayerAdmin(Player, db.session))
     admin.add_view(ModelView(Team, db.session))
     admin.add_view(ModelView(Season, db.session))
     admin.add_view(ModelView(Game, db.session))
