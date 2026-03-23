@@ -307,6 +307,7 @@ def import_season_stats_limited(
             (Game.home_team_id == team.team_id)
             | (Game.away_team_id == team.team_id)
         )
+        .order_by(Game.game_date.desc())
         .limit(limit)
         .all()
     )
