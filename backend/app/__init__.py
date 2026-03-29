@@ -1,12 +1,6 @@
 from .routes.import_routes import import_bp
 from .routes.basic_routes import basic_bp
-from .models.team_game_stats import TeamGameStats
-from .models.player_game_stats import PlayerGameStats
-from .models.player_team_season import PlayerTeamSeason
-from .models.game import Game
-from .models.season import Season
-from .models.team import Team
-from .models.player import Player
+from .services.scheduler import start_scheduler
 from .admin import setup_admin
 from .extensions import db, migrate
 from config import Config
@@ -26,5 +20,7 @@ def create_app():
 
     app.register_blueprint(basic_bp)
     app.register_blueprint(import_bp)
+
+    start_scheduler(app)
 
     return app

@@ -12,7 +12,7 @@ class PlayerAdmin(ModelView):
     )
 
     column_labels = {
-        "headshot_url": "Foto"
+        "headshot_url": "Photo"
     }
 
     column_formatters = {

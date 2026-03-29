@@ -327,3 +327,36 @@ def import_season_stats_limited(
         "team_game_stats_count": team_game_stats_count,
         "player_game_stats_count": player_game_stats_count,
     }
+
+
+def refresh_recent_games_for_team(
+    team_code: str, season_id: int, limit: int = 3
+) -> dict:
+    team = import_team_by_abbreviation(team_code)
+
+    games = (
+        Game.query.filter_by(season_id=season_id)
+        .filter(
+            (Game.home_team_id == team.team_id)
+            | (Game.away_team_id == team.team_id)
+        )
+        .order_by(Game.game_date.desc())
+        .limit(limit)
+        .all()
+    )
+
+    team_game_stats_count = 0
+    player_game_stats_count = 0
+
+    for game in games:
+        print(f"Refreshing stats for game {game.game_id}")
+        team_game_stats_count += import_team_game_stats(game.game_id)
+        player_game_stats_count += import_player_game_stats(game.game_id)
+
+    return {
+        "team_code": team_code.upper(),
+        "season_id": season_id,
+        "games_processed": len(games),
+        "team_game_stats_count": team_game_stats_count,
+        "player_game_stats_count": player_game_stats_count,
+    }
