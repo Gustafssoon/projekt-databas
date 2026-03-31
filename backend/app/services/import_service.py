@@ -122,8 +122,8 @@ def import_games_for_team_and_season(team_code: str, season_id: int) -> int:
     for raw_game in games:
         mapped = map_game(raw_game)
 
-        import_team_by_id(mapped["home_team_id"])
-        import_team_by_id(mapped["away_team_id"])
+        upsert_team_from_schedule(raw_game["homeTeam"])
+        upsert_team_from_schedule(raw_game["awayTeam"])
 
         existing_game = db.session.get(Game, mapped["game_id"])
 
@@ -360,3 +360,27 @@ def refresh_recent_games_for_team(
         "team_game_stats_count": team_game_stats_count,
         "player_game_stats_count": player_game_stats_count,
     }
+
+
+def upsert_team_from_schedule(team_data: dict) -> Team:
+    team_id = team_data["id"]
+    city = team_data.get("placeName", {}).get("default")
+    name = team_data.get("commonName", {}).get("default")
+    abbreviation = team_data.get("abbrev")
+
+    existing_team = db.session.get(Team, team_id)
+
+    if existing_team:
+        existing_team.city = city
+        existing_team.name = name
+        existing_team.abbreviation = abbreviation
+        return existing_team
+
+    team = Team(
+        team_id=team_id,
+        city=city,
+        name=name,
+        abbreviation=abbreviation,
+    )
+    db.session.add(team)
+    return team
