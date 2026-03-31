@@ -191,6 +191,30 @@ VALUES
 (1, 1, 1001, 32, 18, 4, 52.30, 1, 3),
 (2, 2, 1001, 29, 21, 2, 47.70, 0, 2);
 
+-- ======================
+-- SÄKERHET / ANVÄNDARE
+-- ======================
+
+-- Skapa användare
+CREATE USER IF NOT EXISTS 'admin_user'@'localhost' IDENTIFIED BY 'admin123';
+CREATE USER IF NOT EXISTS 'editor_user'@'localhost' IDENTIFIED BY 'editor123';
+CREATE USER IF NOT EXISTS 'analyst_user'@'localhost' IDENTIFIED BY 'analyst123';
+
+-- Ge admin full tillgång till databasen
+GRANT ALL PRIVILEGES ON nhl_database.* TO 'admin_user'@'localhost';
+
+-- Ge editor rätt att läsa och ändra data, men inte droppa tabeller eller hela databasen
+GRANT SELECT, INSERT, UPDATE, DELETE, EXECUTE
+ON nhl_database.* TO 'editor_user'@'localhost';
+
+-- Ge analytiker endast läsrättigheter
+GRANT SELECT ON nhl_database.* TO 'analyst_user'@'localhost';
+
+FLUSH PRIVILEGES;
+
+-- Detta ska inte fungera för analyst:
+-- DELETE FROM player WHERE player_id = 1;
+
 -- =========
 --  SELECTS
 -- =========
